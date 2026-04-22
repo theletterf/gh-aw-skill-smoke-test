@@ -1,4 +1,4 @@
-# gh-aw-metadata: {"schema_version":"v3","frontmatter_hash":"926e730aef7f3f59ec9326a215f6aa0184040c821db3b614e27fe9e84ad2c833","compiler_version":"v0.69.0","strict":true,"agent_id":"copilot"}
+# gh-aw-metadata: {"schema_version":"v3","frontmatter_hash":"13379ae4575ca9924d44ef76063bd400b2cf6105a765ac5b91baf1285842f051","compiler_version":"v0.69.0","strict":true,"agent_id":"copilot"}
 # gh-aw-manifest: {"version":1,"secrets":["COPILOT_GITHUB_TOKEN","GH_AW_GITHUB_MCP_SERVER_TOKEN","GH_AW_GITHUB_TOKEN","GH_AW_PLUGINS_TOKEN","GITHUB_TOKEN"],"actions":[{"repo":"actions/checkout","sha":"de0fac2e4500dabe0009e67214ff5f5447ce83dd","version":"v6.0.2"},{"repo":"actions/download-artifact","sha":"3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c","version":"v8.0.1"},{"repo":"actions/github-script","sha":"3a2844b7e9c422d3c10d287c895573f7108da1b3","version":"v9"},{"repo":"actions/upload-artifact","sha":"043fb46d1a93c77aae656e7c1c64a875d1fc6a0a","version":"v7.0.1"},{"repo":"github/gh-aw-actions/setup","sha":"81b86c58b134601fc10d4745e276d7861cd12911","version":"v0.69.0"},{"repo":"microsoft/apm-action","sha":"a190b0b1a91031057144dc136acf9757a59c9e4d","version":"v1.4.1"}],"containers":[{"image":"ghcr.io/github/gh-aw-firewall/agent:0.25.25"},{"image":"ghcr.io/github/gh-aw-firewall/api-proxy:0.25.25"},{"image":"ghcr.io/github/gh-aw-firewall/squid:0.25.25"},{"image":"ghcr.io/github/gh-aw-mcpg:v0.2.26"},{"image":"ghcr.io/github/github-mcp-server:v1.0.0"},{"image":"node:lts-alpine"}]}
 #    ___                   _   _      
 #   / _ \                 | | (_)     
@@ -183,19 +183,19 @@ jobs:
         run: |
           bash "${RUNNER_TEMP}/gh-aw/actions/create_prompt_first.sh"
           {
-          cat << 'GH_AW_PROMPT_1451cb25e1df0355_EOF'
+          cat << 'GH_AW_PROMPT_d46d68088967b38e_EOF'
           <system>
-          GH_AW_PROMPT_1451cb25e1df0355_EOF
+          GH_AW_PROMPT_d46d68088967b38e_EOF
           cat "${RUNNER_TEMP}/gh-aw/prompts/xpia.md"
           cat "${RUNNER_TEMP}/gh-aw/prompts/temp_folder_prompt.md"
           cat "${RUNNER_TEMP}/gh-aw/prompts/markdown.md"
           cat "${RUNNER_TEMP}/gh-aw/prompts/safe_outputs_prompt.md"
-          cat << 'GH_AW_PROMPT_1451cb25e1df0355_EOF'
+          cat << 'GH_AW_PROMPT_d46d68088967b38e_EOF'
           <safe-output-tools>
           Tools: create_issue, missing_tool, missing_data, noop
-          GH_AW_PROMPT_1451cb25e1df0355_EOF
+          GH_AW_PROMPT_d46d68088967b38e_EOF
           cat "${RUNNER_TEMP}/gh-aw/prompts/safe_outputs_auto_create_issue.md"
-          cat << 'GH_AW_PROMPT_1451cb25e1df0355_EOF'
+          cat << 'GH_AW_PROMPT_d46d68088967b38e_EOF'
           </safe-output-tools>
           <github-context>
           The following GitHub context information is available for this workflow:
@@ -225,9 +225,9 @@ jobs:
           {{/if}}
           </github-context>
           
-          GH_AW_PROMPT_1451cb25e1df0355_EOF
+          GH_AW_PROMPT_d46d68088967b38e_EOF
           cat "${RUNNER_TEMP}/gh-aw/prompts/github_mcp_tools_with_safeoutputs_prompt.md"
-          cat << 'GH_AW_PROMPT_1451cb25e1df0355_EOF'
+          cat << 'GH_AW_PROMPT_d46d68088967b38e_EOF'
           </system>
           
           
@@ -246,11 +246,15 @@ jobs:
           
           1. Read `README.md`.
           2. Attempt to invoke `skill(skill: docs-check-style)`.
-          3. If the skill invocation succeeds, call `noop` with a short message saying the skill was invocable.
-          4. If the skill invocation fails, call `noop` with the exact failure text and state which invocation form you actually attempted.
-          5. Do not perform any fallback review. This workflow is only a skill invocation test.
+          3. If the skill invocation succeeds, call `noop` with a short message that includes all of the following exact values returned by the skill:
+             - version: `1.0.4`
+             - allowed-tools: `Read, Grep, Glob, Bash(vale *), WebFetch`
+             - first source URL: `https://www.elastic.co/docs/contribute-docs/style-guide`
+          4. If you cannot confirm all three exact values from the invoked skill output, treat the invocation as unverified and say so in the `noop` message.
+          5. If the skill invocation fails, call `noop` with the exact failure text and state which invocation form you actually attempted.
+          6. Do not perform any fallback review. This workflow is only a skill invocation test.
           
-          GH_AW_PROMPT_1451cb25e1df0355_EOF
+          GH_AW_PROMPT_d46d68088967b38e_EOF
           } > "$GH_AW_PROMPT"
       - name: Interpolate variables and render templates
         uses: actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3 # v9
@@ -433,9 +437,9 @@ jobs:
           mkdir -p "${RUNNER_TEMP}/gh-aw/safeoutputs"
           mkdir -p /tmp/gh-aw/safeoutputs
           mkdir -p /tmp/gh-aw/mcp-logs/safeoutputs
-          cat > "${RUNNER_TEMP}/gh-aw/safeoutputs/config.json" << 'GH_AW_SAFE_OUTPUTS_CONFIG_676d8a9323f97b3b_EOF'
+          cat > "${RUNNER_TEMP}/gh-aw/safeoutputs/config.json" << 'GH_AW_SAFE_OUTPUTS_CONFIG_949e9dca036a40b4_EOF'
           {"create_issue":{"labels":["gh-aw-skill-smoke"],"max":1,"title_prefix":"[gh-aw-skill-smoke]"},"create_report_incomplete_issue":{},"missing_data":{},"missing_tool":{},"noop":{"max":1,"report-as-issue":"true"},"report_incomplete":{}}
-          GH_AW_SAFE_OUTPUTS_CONFIG_676d8a9323f97b3b_EOF
+          GH_AW_SAFE_OUTPUTS_CONFIG_949e9dca036a40b4_EOF
       - name: Write Safe Outputs Tools
         env:
           GH_AW_TOOLS_META_JSON: |
@@ -634,7 +638,7 @@ jobs:
           
           mkdir -p /home/runner/.copilot
           GH_AW_NODE=$(which node 2>/dev/null || command -v node 2>/dev/null || echo node)
-          cat << GH_AW_MCP_CONFIG_059f35581859265b_EOF | "$GH_AW_NODE" "${RUNNER_TEMP}/gh-aw/actions/start_mcp_gateway.cjs"
+          cat << GH_AW_MCP_CONFIG_c3b9777ddc0f2e84_EOF | "$GH_AW_NODE" "${RUNNER_TEMP}/gh-aw/actions/start_mcp_gateway.cjs"
           {
             "mcpServers": {
               "elastic-docs": {
@@ -689,7 +693,7 @@ jobs:
               "payloadDir": "${MCP_GATEWAY_PAYLOAD_DIR}"
             }
           }
-          GH_AW_MCP_CONFIG_059f35581859265b_EOF
+          GH_AW_MCP_CONFIG_c3b9777ddc0f2e84_EOF
       - name: Download activation artifact
         uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
         with:
