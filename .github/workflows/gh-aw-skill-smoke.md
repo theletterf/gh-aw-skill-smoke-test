@@ -44,6 +44,10 @@ Do not guess another invocation format.
 
 1. Read `README.md`.
 2. Attempt to invoke `skill(skill: docs-check-style)`.
-3. If the skill invocation succeeds, call `noop` with a short message saying the skill was invocable.
-4. If the skill invocation fails, call `noop` with the exact failure text and state which invocation form you actually attempted.
-5. Do not perform any fallback review. This workflow is only a skill invocation test.
+3. If the skill invocation succeeds, call `noop` with a short message that includes all of the following exact values returned by the skill:
+   - version: `1.0.4`
+   - allowed-tools: `Read, Grep, Glob, Bash(vale *), WebFetch`
+   - first source URL: `https://www.elastic.co/docs/contribute-docs/style-guide`
+4. If you cannot confirm all three exact values from the invoked skill output, treat the invocation as unverified and say so in the `noop` message.
+5. If the skill invocation fails, call `noop` with the exact failure text and state which invocation form you actually attempted.
+6. Do not perform any fallback review. This workflow is only a skill invocation test.
