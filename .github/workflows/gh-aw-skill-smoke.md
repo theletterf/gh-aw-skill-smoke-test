@@ -15,6 +15,16 @@ on:
   roles: [admin, maintainer, write]
 permissions:
   contents: read
+mcp-servers:
+  elastic-docs:
+    type: http
+    url: "https://www.elastic.co/docs/_mcp/"
+    allowed: ["*"]
+network:
+  allowed:
+    - defaults
+    - github
+    - "www.elastic.co"
 safe-outputs:
   noop:
 timeout-minutes: 15
