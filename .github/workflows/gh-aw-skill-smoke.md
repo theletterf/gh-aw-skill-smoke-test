@@ -4,7 +4,7 @@ description: |
 
 inlined-imports: true
 imports:
-  - uses: github/gh-aw/.github/workflows/shared/apm.md@v0.71.0
+  - uses: github/gh-aw/.github/workflows/shared/apm.md@v0.70.0
     with:
       packages:
         - elastic/elastic-docs-skills/skills/review/docs-check-style
