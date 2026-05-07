@@ -27,7 +27,7 @@ jobs:
     permissions:
       contents: read
       issues: write
-      pull-requests: read
+      pull-requests: write
     steps:
       - name: Create or update smoke menu comment
         uses: actions/github-script@v9.0.0
