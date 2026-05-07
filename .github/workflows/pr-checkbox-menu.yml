@@ -1,0 +1,127 @@
+name: PR checkbox menu smoke
+
+on:
+  pull_request_target:
+    types: [opened, reopened, synchronize, ready_for_review]
+  issue_comment:
+    types: [edited]
+  workflow_dispatch:
+    inputs:
+      pull_request_number:
+        description: Pull request number to post or refresh the smoke menu on.
+        required: true
+        type: string
+
+permissions:
+  actions: read
+  contents: read
+  discussions: write
+  issues: write
+  pull-requests: write
+
+jobs:
+  post-menu:
+    name: Post or refresh smoke menu
+    if: github.event_name == 'pull_request_target' || github.event_name == 'workflow_dispatch'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      issues: write
+      pull-requests: read
+    steps:
+      - name: Create or update smoke menu comment
+        uses: actions/github-script@v9.0.0
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            const markerStart = '<!-- gh-aw-checkbox-smoke:start -->';
+            const markerEnd = '<!-- gh-aw-checkbox-smoke:end -->';
+            const pullRequestNumber = context.eventName === 'workflow_dispatch'
+              ? Number(context.payload.inputs.pull_request_number)
+              : context.payload.pull_request.number;
+
+            if (!pullRequestNumber) {
+              core.setFailed('Pull request number is required.');
+              return;
+            }
+
+            const body = [
+              markerStart,
+              '### Agentic Workflow checkbox smoke test',
+              '',
+              'Edit this comment and check the box to run the `gh-aw` checkbox smoke workflow.',
+              '',
+              '- [ ] Run checkbox AW smoke',
+              markerEnd,
+            ].join('\n');
+
+            const { data: comments } = await github.rest.issues.listComments({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: pullRequestNumber,
+              per_page: 100,
+            });
+            const existing = comments.find(comment =>
+              comment.user?.login === 'github-actions[bot]' &&
+              comment.body?.includes(markerStart) &&
+              comment.body?.includes(markerEnd)
+            );
+
+            if (existing) {
+              await github.rest.issues.updateComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                comment_id: existing.id,
+                body,
+              });
+            } else {
+              await github.rest.issues.createComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: pullRequestNumber,
+                body,
+              });
+            }
+
+  evaluate-trigger:
+    name: Evaluate smoke menu trigger
+    if: >-
+      github.event_name == 'issue_comment' &&
+      github.event.issue.pull_request != null &&
+      github.actor != 'github-actions[bot]' &&
+      github.event.comment.user.login == 'github-actions[bot]' &&
+      contains(github.event.comment.body, '<!-- gh-aw-checkbox-smoke:start -->') &&
+      contains(github.event.comment.body, '<!-- gh-aw-checkbox-smoke:end -->')
+    runs-on: ubuntu-latest
+    outputs:
+      smoke_triggered: ${{ steps.evaluate.outputs.smoke_triggered }}
+    steps:
+      - name: Parse smoke menu transition
+        id: evaluate
+        uses: actions/github-script@v9.0.0
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            const body = context.payload.comment.body || '';
+            const previousBody = context.payload.changes?.body?.from || '';
+            const wasChecked = previousBody.includes('- [x] Run checkbox AW smoke');
+            const isChecked = body.includes('- [x] Run checkbox AW smoke');
+            core.setOutput('smoke_triggered', String(!wasChecked && isChecked));
+
+  run-smoke:
+    name: Checkbox smoke AW
+    needs: [evaluate-trigger]
+    if: needs.evaluate-trigger.outputs.smoke_triggered == 'true'
+    permissions:
+      actions: read
+      contents: read
+      discussions: write
+      issues: write
+      pull-requests: write
+    uses: ./.github/workflows/gh-aw-skill-smoke.lock.yml
+    with:
+      aw_context: >-
+        {"repo":"${{ github.repository }}","run_id":"${{ github.run_id }}","workflow_id":"${{ github.workflow_ref }}","workflow_call_id":"${{ github.run_id }}-${{ github.run_attempt }}","time":"${{ github.event.comment.updated_at }}","actor":"${{ github.actor }}","event_type":"${{ github.event_name }}","item_type":"pull_request","item_number":"${{ github.event.issue.number }}","comment_id":"${{ github.event.comment.id }}","comment_node_id":"","allow-bot-authored-trigger-comment":true,"otel_trace_id":"","otel_parent_span_id":""}
+      smoke-label: checkbox-menu-edited-comment
+    secrets:
+      COPILOT_GITHUB_TOKEN: ${{ secrets.COPILOT_GITHUB_TOKEN }}
