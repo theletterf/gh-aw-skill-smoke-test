@@ -26,6 +26,8 @@ Before triggering the workflow, configure the `COPILOT_GITHUB_TOKEN` repository 
 
 The checkbox menu workflow must be present on the default branch for `issue_comment(edited)` events to run.
 
+This test PR exists only to exercise the checkbox menu flow.
+
 1. Open a pull request that changes any file.
 2. Run **PR checkbox menu smoke** with `workflow_dispatch` and the pull request number to post the menu comment.
 3. Edit the bot-authored menu comment, change `- [ ] Run checkbox AW smoke` to `- [x] Run checkbox AW smoke`, and save.
